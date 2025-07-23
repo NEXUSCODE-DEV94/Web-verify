@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>認証 CAPTCHA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #38bdf8;
+    }
+    #challenge {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    input, button {
+      font-size: 1.1rem;
+      padding: 0.6rem 1.2rem;
+      margin: 0.4rem;
+      border-radius: 0.5rem;
+      border: none;
+    }
+    input {
+      width: 200px;
+      text-align: center;
+    }
+    button {
+      background-color: #38bdf8;
+      color: #0f172a;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background-color: #0ea5e9;
+      transform: scale(1.05);
+    }
+    #input-area {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>認証テスト</h1>
+  <div id="challenge">読み込み中...</div>
+  <div id="input-area"></div>
+
+  <script>
+    const type = Math.floor(Math.random() * 5);
+
+    if (type === 0) {
+      const a = Math.floor(Math.random() * 10);
+      const b = Math.floor(Math.random() * 10);
+      document.getElementById('challenge').innerText = `${a} + ${b} = ?`;
+      document.getElementById('input-area').innerHTML = `
+        <input id="calcAns" type="number" placeholder="答えを入力">
+        <button onclick="checkCalc()">送信</button>
+      `;
+      window.checkCalc = () => {
+        if (parseInt(document.getElementById('calcAns').value) === a + b) success();
+        else alert("不正解です");
+      };
+    }
+
+    else if (type === 1) {
+      document.getElementById('challenge').innerText = `ボタンを2秒以上長押ししてください`;
+      document.getElementById('input-area').innerHTML = `<button id="holdBtn">長押し</button>`;
+      let downTime;
+      const btn = document.getElementById('holdBtn');
+      btn.onmousedown = () => downTime = Date.now();
+      btn.onmouseup = () => {
+        const held = Date.now() - downTime;
+        if (held >= 2000) success();
+        else alert("押す時間が短すぎます！");
+      };
+      btn.ontouchstart = btn.onmousedown;
+      btn.ontouchend = btn.onmouseup;
+    }
+
+    else if (type === 2) {
+      const colors = ['赤', '青', '緑', '黄'];
+      const answer = colors[Math.floor(Math.random() * colors.length)];
+      document.getElementById('challenge').innerText = `「${answer}」をクリックしてください`;
+      document.getElementById('input-area').innerHTML = colors.map(c => `
+        <button onclick="colorCheck('${c}')">${c}</button>
+      `).join('');
+      window.colorCheck = (c) => {
+        if (c === answer) success();
+        else alert("不正解です");
+      };
+    }
+
+    else if (type === 3) {
+      const word = "CAPTCHA".split('');
+      const shuffled = word.slice().sort(() => 0.5 - Math.random());
+      document.getElementById('challenge').innerText = `「${shuffled.join(' ')}」を正しい順に並び替えて入力`;
+      document.getElementById('input-area').innerHTML = `
+        <input id="orderInput" placeholder="例: CAPTCHA">
+        <button onclick="orderCheck()">送信</button>
+      `;
+      window.orderCheck = () => {
+        if (document.getElementById('orderInput').value.toUpperCase() === "CAPTCHA") success();
+        else alert("不正解です");
+      };
+    }
+
+    else if (type === 4) {
+      const emojis = ['😐', '😄', '😡', '😴'];
+      const answer = '😄';
+      document.getElementById('challenge').innerText = `笑顔を選んでください`;
+      document.getElementById('input-area').innerHTML = emojis.map(e => `
+        <button onclick="emojiCheck('${e}')">${e}</button>
+      `).join('');
+      window.emojiCheck = (e) => {
+        if (e === answer) success();
+        else alert("不正解です");
+      };
+    }
+
+    function success() {
+      window.location.href = "/success";
+    }
+  </script>
+</body>
+</html>
